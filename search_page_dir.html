@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        SA
+    </title>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+</style>
+</head>
+<body>
+
+    <h1 style="text-align: center; font-size: 200;">
+        Search Alumni
+    </h1>
+  
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+    
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
+
+    <script>
+
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+          apiKey: "AIzaSyAl7M57kUhkIqtC6qQHoPTVoLoUVpzJFww",
+          authDomain: "alumni-1b987.firebaseapp.com",
+          databaseURL: "https://alumni-1b987.firebaseio.com",
+          projectId: "alumni-1b987",
+          storageBucket: "alumni-1b987.appspot.com",
+          messagingSenderId: "462415600832",
+          appId: "1:462415600832:web:1e59f6138796f05c91a125",
+          measurementId: "G-SC8PCL7EFJ"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+</script>
+
+<center class="box">
+  <!-- <div class="dropdown"> -->
+  <!-- <button class="dropbtn">Search By</button> -->
+  Search by:
+  <div class="dropdown-content"></div>
+  <select style="max-width: 80px;height: 30px;">
+    <option id="sclg">College</option>
+    <option id="sname" onclick="go1('sclg')">Name</option>
+    <option id="syear" onclick="go1('syear')">Year</option>
+    <option id="sbranch" onclick="searchforBranch()" tabindex="-1">Branch</option>
+    <ul class="dropdown-menu" id="list">
+    </ul>
+  </select>
+</div>
+  <input style="height:24px; width:200px" type="text" id="search_box" style="align-self: center; margin-right:100;" placeholder="Search ..." name="searchbox"/>
+  <button onclick="go()" style="height:30px; width:50px">Go</button>
+
+   <!-- <h1 id="head" style="text-align: center;">
+    College in your State 
+</h1> -->
+  <!-- <div class="dropdown-content">
+    <a id="sclg" onclick="go1('sclg')">College</a>  
+    <a id="sname"  onclick="go1('sname')">Name</a>
+    <a id="syear" onclick="go1('syear')">Year</a>
+    <a id="sbranch" class="test" onclick="searchforBranch()" tabindex="-1"  >Branch <span class="caret"></span></a>
+        <ul class="dropdown-menu" id="list">
+        </ul>
+  </div> -->
+</center>
+
+<table align="center">
+    <tr>
+        <td>
+            <ul
+                 id="search_list">
+            </ul
+            >
+        </td>
+    </tr>
+</table>
+
+<script>
+
+function go1(id)
+{
+    window.localStorage.setItem("s",id);
+}
+function go()
+{
+    var id1=window.localStorage.getItem("s");
+    alert(id1);
+    if(id1=='sclg')
+    {
+        searchforcollege();
+    }
+    else if(id1=='sname')
+    {
+        searchforname();
+    }
+    else if(id1=='syear')
+    {
+        searchforYear();
+    }    
+}
+document.getElementById("search_list").innerHTML="";
+  firebase.database().ref("Users/Alumni/").on("value", function(snapshot){
+			snapshot.forEach(function(child){
+                child.forEach(function(mychild){
+                    x=mychild.val();
+            
+                    profile="profile1.jpg";
+          var block='<li class="media">'+
+                    '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+                    '<div class="media-body">'+
+                    '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x.college+'</h5>'
+                    '</div>'
+                    '</li>';
+					document.getElementById("search_list").innerHTML+=block;
+                });
+            });
+        });
+
+// function serach(ph)
+// {
+   
+//     alert(ph);
+//     if(ph==sclg)
+//     {
+//         alter("College");
+//         searchforcollege();
+//     }
+//     else if(ph=="sname")
+//     {
+//         document.getElementById("sname")
+//         searchforname();
+//     }
+//     else if(ph=="syear")
+//     {
+//         searchforYear();
+//     }
+//     else if(ph=="sbranch")
+//     {
+//         searchforBranch();
+//     }
+// }
+
+function searchforBranch()
+  {
+  //  document.getElementById("head").innerHTML="";  
+    var count=0;
+    document.getElementById("search_list").innerHTML="";
+    firebase.database().ref("Degree/").once("value",function(snapshot){
+        snapshot.forEach(function(child){
+            x=child.val();
+            document.getElementById("search_box").innerHTML="";
+            document.getElementById("search_box").setAttribute('Placeholder','Please select the branch')
+        document.getElementById("list").innerHTML+="<option value="+x +" onclick='s_branch(this.value)'>"+x+"</option>"
+        
+        });
+    });
+    var s_name=document.getElementById("list");
+    s_branch(s_name);
+  }
+
+  function s_branch(s_name){
+      console.log(s_name);
+    document.getElementById("search_list").innerHTML="";
+  //  document.getElementById("head").innerHTML="";
+  firebase.database().ref("Users/College/").once("value", function(snapshot){
+			snapshot.forEach(function(child){
+               
+				x=child.val();
+        check_name=x.branch.toLowerCase();
+					if(check_name==s_name.toLowerCase()){
+        {
+          profile="profile1.jpg";
+          var block='<li class="media" value="'+child.key+'">'+
+                    '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+                    '<div class="media-body">'+
+                    '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x.name+'</h5>'+
+                    '</p>'+
+                    '</div>'+
+                    '</li>';
+					document.getElementById("search_list").innerHTML+=block;
+        }
+					}
+			});
+        });
+        document.getElementById("list").innerHTML="";
+  }
+
+    function searchforcollege()
+    {
+        //
+        //var s_clg=window.prompt("Enter College name");
+       var s_clg=document.getElementById("search_box").value;
+       // document.getElementById("head").innerHTML="";
+       document.getElementById("search_box").innerHTML="";
+          document.getElementById("search_box").setAttribute('Placeholder','Enter college name');
+        document.getElementById("search_list").innerHTML=""
+        var x1;
+            //college and college uid
+            firebase.database().ref("Users/College").once("value",function(snapshot){
+                snapshot.forEach(function(child){
+                    var x=child.val().name.toLowerCase();
+                    x1=child.key;
+                    if(x==s_clg.toLocaleLowerCase())
+                    {
+
+                        firebase.database().ref("Users/Alumni/").once("value",function(snapshot){
+                        snapshot.forEach(function(child){
+                        child.forEach(function(mychild){
+                        var x=mychild.val().name;
+                        var x11=child.key;
+                        if(x1==x11)
+                        {
+                                  profile="profile1.jpg";
+                                  var block='<li class="media" value="'+child.key+'">'+
+                                 '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+                                 '<div class="media-body">'+
+                                 '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x+'</h5>'
+                    
+                                '</div>'+
+                                '</li>';
+			            		document.getElementById("search_list").innerHTML+=block;
+                    
+                        }
+                    });
+                });
+            });
+                       
+                    }  
+                });
+            });
+   }
+
+    function searchforname(){
+        document.getElementById("search_box").innerHTML="";
+            document.getElementById("search_box").setAttribute('Placeholder','Enter name')
+        var s_name=document.getElementById("search_box").value;
+        document.getElementById("search_list").innerHTML="";
+  firebase.database().ref("Users/College/").once("value", function(snapshot){
+			snapshot.forEach(function(child){
+               
+				x=child.val();
+        check_name=x.name.toLowerCase();
+					if(check_name.includes(s_name.toLowerCase())){
+        {
+          profile="profile1.jpg";
+          var block='<li class="media" value="'+child.key+'">'+
+                    '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+                    '<div class="media-body">'+
+                    '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x.name+'</h5>'
+                    
+                    '</div>'+
+                    '</li>';
+					document.getElementById("search_list").innerHTML+=block;
+        }
+					}
+
+			});
+        });
+  }
+
+//   function searchforBranch(){
+//     document.getElementById("search_list").innerHTML="";
+//   var s_name=document.getElementById('search_branch').value;
+//   firebase.database().ref("Users/College/").once("value", function(snapshot){
+// 			snapshot.forEach(function(child){
+               
+// 				x=child.val();
+//         check_name=x.branch;
+// 					if(check_name.includes(s_name)){
+//         {
+//           profile="profile1.jpg";
+//           var block='<li class="media" value="'+child.key+'">'+
+//                     '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+//                     '<div class="media-body">'+
+//                     '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x.name+'</h5>'+
+//                     '</p>'+
+//                     '</div>'+
+//                     '</li>';
+// 					document.getElementById("search_list").innerHTML+=block;
+//         }
+// 					}
+// 			});
+//         });
+//   }
+function searchforYear(){
+
+    document.getElementById("search_box").innerHTML="";
+            document.getElementById("search_box").setAttribute('Placeholder','Enter Batch');
+            var s_name=document.getElementById("search_box").value;
+    document.getElementById("search_list").innerHTML="";
+  
+  firebase.database().ref("Users/College/").once("value", function(snapshot){
+			snapshot.forEach(function(child){
+               
+				var x=child.val();
+        check_name=x.firstbatch;
+					if(check_name.includes(s_name)){
+        {
+          profile="profile1.jpg";
+          var block='<li class="media" value="'+child.key+'">'+
+                    '<img height="70px" width="70px" style="border-radius:50%;" src="'+profile+'" alt="...">'+
+                    '<div class="media-body">'+
+                    '<h5 style="padding:10 10 0 10;" class="mt-0 mb-1">'+x.name+'</h5>'+
+                    
+                    
+                    '</p>'+
+                    '</div>'+
+                    '</li>';
+					document.getElementById("search_list").innerHTML+=block;
+        }
+					}
+
+			});
+        });
+
+  }
+
+
+
+</script>
+</body>
+</html>

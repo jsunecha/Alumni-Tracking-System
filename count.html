@@ -1,0 +1,100 @@
+<html>
+    <head>
+
+    </head>
+    <body onload="calculate_alumni()">
+        <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
+        <script src="firebase.js"></script>
+        <script>
+            // Your web app's Firebase configuration
+    var firebaseConfig = {
+    apiKey: "AIzaSyAl7M57kUhkIqtC6qQHoPTVoLoUVpzJFww",
+    authDomain: "alumni-1b987.firebaseapp.com",
+    databaseURL: "https://alumni-1b987.firebaseio.com",
+    projectId: "alumni-1b987",
+    storageBucket: "alumni-1b987.appspot.com",
+    messagingSenderId: "462415600832",
+    appId: "1:462415600832:web:1e59f6138796f05c91a125",
+    measurementId: "G-SC8PCL7EFJ"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+  var uid;
+  var cur_email;
+  firebase.auth().onAuthStateChanged(function(user) {
+				  if (user) {
+				    // User is signed in.
+				    cur_email = user.email;
+                     uid = user.uid; 
+				  }
+       });
+ 
+   function calculate_alumni()
+  {
+    var count=0;
+    firebase.database().ref("Users/Alumni/").once("value", function(snapshot){
+		snapshot.forEach(function(child){
+            child.forEach(function(mychild)
+            {
+                    count+=1;
+            });	
+        });
+        document.getElementById("alumni_count").innerHTML=count;
+    });
+    calculate_college();
+    calculate_alumni_college();
+  }
+
+ function calculate_alumni_college(){
+            var count=0;
+            firebase.database().ref("Users/Alumni/").once("value",function(snapshot){
+                    snapshot.forEach(function(child){
+                      if(child.key==uid)
+                      {
+                        child.forEach(function(mychild){
+                                count+=1;
+                        });
+                      }
+                    });
+                    document.getElementById("clg_alumni").innerHTML=count;
+            });
+   }
+
+  function calculate_college()
+  {
+    var count=0;
+    firebase.database().ref("Users/College/").once("value", function(snapshot){
+		snapshot.forEach(function(child){
+            
+                    count+=1;
+                    console.log(count);
+        });
+        console.log(count);
+        document.getElementById("clg_count").innerHTML=count;
+    });
+    
+  }
+        </script>
+
+        <div>
+            <h2>Total Alumni Registered</h2>
+            <br>
+            <h1 id="alumni_count"></h1>
+        </div>
+        <div>
+            <h2>Total College Registered</h2>
+            <br>
+            <h1 id="clg_count"></h1>
+        </div>
+        <div>
+            <h2>Total Aluumni of College</h2>
+            <br>
+            <h1 id="clg_alumni"></h1>
+        </div>
+    </body>
+</html>
